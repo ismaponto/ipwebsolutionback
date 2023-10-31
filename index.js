@@ -15,6 +15,7 @@ const pool = new Pool({
     database: process.env.DB_NAME, // Nombre de la base de datos
     password: process.env.DB_PASSWORD, // Contraseña de la base de datos
     port: process.env.DB_PORT, // Puerto de la base de datos
+    ssl: true
 });
 
 
