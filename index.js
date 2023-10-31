@@ -3,6 +3,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
+const cors = require('cors');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -20,7 +21,11 @@ const transporter = nodemailer.createTransport({
 });
 
 app.use(bodyParser.json());
-
+// Crea un middleware de cors
+const corsOptions = {
+    origin: 'https://ipwebsolutions.vercel.app', // * permite que todas las aplicaciones web accedan a tu API
+};
+const corsMiddleware = cors(corsOptions);
 app.post('/contacto', async(req, res) => {
     const { email, nombre, apellido } = req.body;
     const userId = uuid.v4();
