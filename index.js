@@ -22,10 +22,14 @@ const transporter = nodemailer.createTransport({
 
 app.use(bodyParser.json());
 // Crea un middleware de cors
-const corsOptions = {
-    origin: 'https://ipwebsolutions.vercel.app', // * permite que todas las aplicaciones web accedan a tu API
-};
-const corsMiddleware = cors(corsOptions);
+
+app.use(cors({
+    origin: 'https://ipwebsolutions.vercel.app', // Reemplaza con la URL de tu aplicación React
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true, // Habilita las cookies y credenciales
+}));
+
+
 app.post('/contacto', async(req, res) => {
     const { email, nombre, apellido } = req.body;
     const userId = uuid.v4();
@@ -101,6 +105,10 @@ app.get('/cancelar', async(req, res) => {
     await pool.query('UPDATE subscribers SET unsubscribed = true WHERE email = $1', [email]);
 
     res.send('Tu suscripción ha sido cancelada.');
+});
+
+app.listen(port, () => {
+    console.log(`Servidor Express escuchando en el puerto ${port}`);
 });
 
 app.listen(port, () => {
