@@ -9,7 +9,14 @@ require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 3000;
 
-const pool = pgp(process.env.databaseURL);
+const pool = new Pool({
+    user: process.env.DB_USER, // Nombre de usuario de la base de datos
+    host: process.env.DB_HOST, // Nombre de host de la base de datos
+    database: process.env.DB_NAME, // Nombre de la base de datos
+    password: process.env.DB_PASSWORD, // Contraseña de la base de datos
+    port: process.env.DB_PORT, // Puerto de la base de datos
+    ssl: true
+});
 
 
 const transporter = nodemailer.createTransport({
