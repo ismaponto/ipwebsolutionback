@@ -9,7 +9,7 @@ require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 3000;
 
-const pool = pgp('postgres://ismaelponto:GlGEZC5hRWs8ppKxpVSwx38sDHNjXpWV@dpg-cl0mubr6fquc7391tg7g-a.frankfurt-postgres.render.com/custumers');
+const pool = pgp(process.env.databaseURL);
 
 
 const transporter = nodemailer.createTransport({
