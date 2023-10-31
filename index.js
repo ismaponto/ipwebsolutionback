@@ -49,7 +49,7 @@ app.post('/contacto', async(req, res) => {
         await client.query('BEGIN');
 
         // Inserta el nuevo suscriptor en la base de datos con el token de confirmación
-        await client.query('INSERT INTO subscribers (id, email, nombre, apellido, confirmation_token) VALUES ($1, $2, $3, $4, $5)', [userId, email, nombre, apellido, confirmationToken]);
+        await client.query('INSERT INTO subscribers (id, email, nombre, apellido, confirmation_token, Subscribed, Unsubscribed) VALUES($1, $2, $3, $4, $5, $6, $7)', [userId, email, nombre, apellido, confirmationToken, 'false', 'false']);
 
         // Envía el correo de confirmación con el enlace que contiene el token
         const confirmationLink = `https://ipwebsolutionback.onrender.com8]\confirmar?token=${confirmationToken}`;
