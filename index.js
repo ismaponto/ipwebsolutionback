@@ -10,8 +10,13 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 const pool = new Pool({
-    connectionString: process.env.POSTGRES_URL + "?sslmode=require",
+    user: process.env.DB_USER, // Nombre de usuario de la base de datos
+    host: process.env.DB_HOST, // Nombre de host de la base de datos
+    database: process.env.DB_NAME, // Nombre de la base de datos
+    password: process.env.DB_PASSWORD, // Contraseña de la base de datos
+    port: process.env.DB_PORT, // Puerto de la base de datos
 });
+
 
 const transporter = nodemailer.createTransport({
     service: 'Gmail', // O cualquier otro servicio de correo
