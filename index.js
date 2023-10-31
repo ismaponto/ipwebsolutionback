@@ -50,7 +50,7 @@ app.post('/contacto', async(req, res) => {
         await client.query('INSERT INTO subscribers (id, email, nombre, apellido, confirmation_token) VALUES ($1, $2, $3, $4, $5)', [userId, email, nombre, apellido, confirmationToken]);
 
         // Envía el correo de confirmación con el enlace que contiene el token
-        const confirmationLink = `https://ipwebsolutionback.vercel.app/confirmar?token=${confirmationToken}`;
+        const confirmationLink = `https://ipwebsolutionback.onrender.com/confirmar?token=${confirmationToken}`;
         const mailOptions = {
             from: process.env.EMAIL_USER,
             to: email,
