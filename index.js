@@ -1,4 +1,4 @@
-const { Pool } = pg;
+const { Pool } = require('pg');
 const express = require('express');
 const bodyParser = require('body-parser');
 const crypto = require('crypto');
@@ -15,7 +15,6 @@ const pool = new Pool({
     database: process.env.DB_NAME, // Nombre de la base de datos
     password: process.env.DB_PASSWORD, // Contraseña de la base de datos
     port: process.env.DB_PORT, // Puerto de la base de datos
-    ssl: true
 });
 
 
@@ -51,7 +50,7 @@ app.post('/contacto', async(req, res) => {
         await client.query('INSERT INTO subscribers (id, email, nombre, apellido, confirmation_token) VALUES ($1, $2, $3, $4, $5)', [userId, email, nombre, apellido, confirmationToken]);
 
         // Envía el correo de confirmación con el enlace que contiene el token
-        const confirmationLink = `https://ipwebsolutionback.onrender.com/confirmar?token=${confirmationToken}`;
+        const confirmationLink = `https://ipwebsolutionback.onrender.com8]\confirmar?token=${confirmationToken}`;
         const mailOptions = {
             from: process.env.EMAIL_USER,
             to: email,
