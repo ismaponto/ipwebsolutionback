@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const cors = require('cors');
+require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 3000;
