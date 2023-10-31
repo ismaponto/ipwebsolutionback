@@ -110,7 +110,3 @@ app.get('/cancelar', async(req, res) => {
 app.listen(port, () => {
     console.log(`Servidor Express escuchando en el puerto ${port}`);
 });
-
-app.listen(port, () => {
-    console.log(`Servidor Express escuchando en el puerto ${port}`);
-});
