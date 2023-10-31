@@ -29,6 +29,30 @@ app.use(cors({
     credentials: true, // Habilita las cookies y credenciales
 }));
 
+try {
+    db.connect();
+    console.log('La conexión a la base de datos se realizó correctamente.');
+
+    // Realiza una consulta
+    const query = `SELECT * FROM users`;
+    const result = await db.query(query);
+
+    // Imprime los resultados
+    console.log(result);
+} catch (error) {
+    console.log('No se pudo conectar a la base de datos.');
+    console.log(error);
+}
+const query2 = `INSERT INTO users (name, email, password) VALUES ('John Doe', 'johndoe@example.com', 'secret')`;
+const result = await connection.query(query2);
+
+// Imprime el resultado
+console.log(result);
+}
+catch (error) {
+    console.log('No se pudo conectar a la base de datos.2');
+    console.log(error);
+}
 
 app.post('/contacto', async(req, res) => {
     const { email, nombre, apellido } = req.body;
