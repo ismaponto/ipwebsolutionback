@@ -1,4 +1,4 @@
-const { Pool, Client } = require('pg');
+const pgp = require('pg-promise')();
 const express = require('express');
 const bodyParser = require('body-parser');
 const crypto = require('crypto');
@@ -9,13 +9,7 @@ require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 3000;
 
-const pool = new Pool({
-    user: process.env.DB_USER, // Nombre de usuario de la base de datos
-    host: process.env.DB_HOST, // Nombre de host de la base de datos
-    database: process.env.DB_NAME, // Nombre de la base de datos
-    password: process.env.DB_PASSWORD, // Contraseña de la base de datos
-    port: process.env.DB_PORT, // Puerto de la base de datos
-});
+const pool = pgp('postgres://ismaelponto:GlGEZC5hRWs8ppKxpVSwx38sDHNjXpWV@dpg-cl0mubr6fquc7391tg7g-a.frankfurt-postgres.render.com/custumers');
 
 
 const transporter = nodemailer.createTransport({
