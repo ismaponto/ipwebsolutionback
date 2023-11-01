@@ -6,4 +6,4 @@ function validarFormatoEmail(email) {
     return regex.test(email);
 }
 
-export default { validarFormatoEmail }
+export default validarFormatoEmail;
