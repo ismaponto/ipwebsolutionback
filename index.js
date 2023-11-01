@@ -6,7 +6,6 @@ require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 5000;
 
-
 app.use(bodyParser.json());
 app.use(cors({
     origin: '*',
@@ -15,15 +14,15 @@ app.use(cors({
     ssl: true
 }));
 
-// Ruta para suscripción
-app.post('/subscribe', require('./routes/subscribe'));
+// Importa y configura las rutas directamente en el archivo principal
+const subscribeRouter = require('./routes/subscribe');
+const confirmRouter = require('./routes/confirm');
+const cancelRouter = require('./routes/cancel');
 
-// Ruta para confirmar suscripción
-app.get('/confirmar', require('./routes/confirm'));
-
-// Ruta para cancelar suscripción
-app.get('/cancelar', require('./routes/cancel'));
-
+// Utiliza las rutas importadas
+app.use('/subscribe', subscribeRouter);
+app.use('/confirmar', confirmRouter);
+app.use('/cancelar', cancelRouter);
 
 // Inicia el servidor
 app.listen(port, () => {
