@@ -3,12 +3,14 @@ const router = express.Router();
 const crypto = require('crypto');
 const pool = require('../controls/db'); // Asegúrate de proporcionar la ruta correcta a tu archivo de configuración de la piscina
 const nodemailer = require('nodemailer');
+app.use(bodyParser.json());
 
 router.post('/', async(req, res) => {
     const { email, nombre, apellido } = req.body;
     const confirmationToken = crypto.randomBytes(32).toString('hex');
-
+    console.log('1');
     const client = await pool.connect();
+
     const transporter = nodemailer.createTransport({
         service: 'Gmail', // Nombre del servicio de correo (puedes usar otros servicios o configurar SMTP directamente)
         auth: {
@@ -19,11 +21,13 @@ router.post('/', async(req, res) => {
 
     try {
         await client.query('BEGIN');
+        console.log('2')
 
         // Validación de datos de entrada (asegúrate de hacer una validación más completa)
         if (!email || !nombre || !apellido) {
             throw new Error('Datos de entrada incompletos');
         }
+        console.log('3')
 
         // Verifica si el correo electrónico ya está en uso
         const checkEmailQuery = 'SELECT * FROM subscribers WHERE email = $1';
@@ -34,6 +38,7 @@ router.post('/', async(req, res) => {
             res.status(400).json({ error: 'El correo electrónico ya está registrado.' });
             return;
         }
+        console.log('4')
 
         // Inserta el nuevo suscriptor en la base de datos con el token de confirmación
         const insertQuery = 'INSERT INTO subscribers (email, nombre, apellido, confirmation_token, subscribed, unsubscribed) VALUES($1, $2, $3, $4, $5, $6)';
@@ -47,6 +52,7 @@ router.post('/', async(req, res) => {
             subject: 'Confirma tu suscripción',
             text: `Haz clic en el siguiente enlace para confirmar tu suscripción: ${confirmationLink}`
         };
+        console.log('5')
 
         transporter.sendMail(mailOptions, (error, info) => {
             if (error) {

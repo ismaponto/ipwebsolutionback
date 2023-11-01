@@ -1,6 +1,5 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const crypto = require('crypto');
 const cors = require('cors');
 require('dotenv').config();
 
@@ -17,7 +16,7 @@ app.use(cors({
 }));
 
 // Ruta para suscripción
-app.post('/contacto', require('./routes/subscribe'));
+app.post('/subscribe', require('./routes/subscribe'));
 
 // Ruta para confirmar suscripción
 app.get('/confirmar', require('./routes/confirm'));
