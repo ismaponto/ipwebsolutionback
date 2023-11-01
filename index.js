@@ -10,7 +10,7 @@ const port = process.env.PORT || 5000;
 
 app.use(bodyParser.json());
 app.use(cors({
-    origin: 'https://ipwebsolutions.vercel.app',
+    origin: '*',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
     ssl: true
