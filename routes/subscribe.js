@@ -3,9 +3,16 @@ const router = express.Router();
 const crypto = require('crypto');
 const pool = require('../controls/db'); // Asegúrate de proporcionar la ruta correcta a tu archivo de configuración de la piscina
 const nodemailer = require('nodemailer');
-require("../controls/regex");
 
+function validarFormatoEmail(email) {
+    // Expresión regular para validar el formato de correo electrónico
+    const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+
+    // Utiliza el método test para verificar si el email coincide con la expresión regular
+    return regex.test(email);
+}
 router.post('/', async(req, res) => {
+
     const { email, nombre, apellido } = req.body;
     const confirmationToken = crypto.randomBytes(32).toString('hex');
     console.log('1');
