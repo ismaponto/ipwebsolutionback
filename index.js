@@ -44,7 +44,6 @@ app.get('/confirmar', require('./routes/confirm'));
 app.get('/cancelar', require('./routes/cancel'));
 
 
-
 // Inicia el servidor
 app.listen(port, () => {
     console.log(`Servidor Express escuchando en el puerto ${port}`);

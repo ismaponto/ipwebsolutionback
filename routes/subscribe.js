@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
 const { Pool } = require('pg');
-const { validarFormatoEmail } = require('../controls/regex');
+import { validarFormatoEmail } from('../controls/regex');
+
 const pool = new Pool({
     host: process.env.DB_HOST,
     database: process.env.DB_NAME,
