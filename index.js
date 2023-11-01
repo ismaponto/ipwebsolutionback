@@ -31,7 +31,7 @@ app.use(bodyParser.json());
 // Crea un middleware de cors
 
 app.use(cors({
-    origin: 'https://ipwebsolutions.vercel.app', // Reemplaza con la URL de tu aplicación React
+    origin: 'https://ipwebsolutions-n854q83yz-ismaponto.vercel.app', // Reemplaza con la URL de tu aplicación React
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true, // Habilita las cookies y credenciales
     ssl: true
