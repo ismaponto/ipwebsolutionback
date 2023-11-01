@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
 const { Pool } = require('pg');
-const validarFormatoEmail = require('../controls/regex');
+// const validarFormatoEmail = require('../controls/regex');
 
 const pool = new Pool({
     host: process.env.DB_HOST,
@@ -27,7 +27,7 @@ router.post('/', async(req, res) => {
         if (!email || !nombre || !apellido) {
             throw new Error('Datos de entrada incompletos');
         }
-        if (!validarFormatoEmail(email)) { throw new Error('formato de email no valido') }
+        // if (!validarFormatoEmail(email)) { throw new Error('formato de email no valido') }
 
         // Verifica si el correo electrónico ya está en uso
         const checkEmailQuery = 'SELECT * FROM subscribers WHERE email = $1';
