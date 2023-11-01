@@ -3,6 +3,7 @@ const router = express.Router();
 const crypto = require('crypto');
 const pool = require('../controls/db'); // Asegúrate de proporcionar la ruta correcta a tu archivo de configuración de la piscina
 const nodemailer = require('nodemailer');
+import { validarFormatoEmail } from "../controls/regex";
 
 router.post('/', async(req, res) => {
     const { email, nombre, apellido } = req.body;
@@ -38,6 +39,13 @@ router.post('/', async(req, res) => {
             return;
         }
         console.log('4')
+
+        if (!validarFormatoEmail(email)) {
+            res.status(400).json({
+                error: 'El correo electronico no tiene el formato correcto'
+            });
+            return;
+        }
 
         // Inserta el nuevo suscriptor en la base de datos con el token de confirmación
         const insertQuery = 'INSERT INTO subscribers (email, nombre, apellido, confirmation_token, subscribed, unsubscribed) VALUES($1, $2, $3, $4, $5, $6)';
