@@ -3,7 +3,7 @@ const router = express.Router();
 const crypto = require('crypto');
 const pool = require('../controls/db'); // Asegúrate de proporcionar la ruta correcta a tu archivo de configuración de la piscina
 const nodemailer = require('nodemailer');
-import { validarFormatoEmail } from "../controls/regex";
+const validarFormatoEmail = require("../controls/regex");
 
 router.post('/', async(req, res) => {
     const { email, nombre, apellido } = req.body;

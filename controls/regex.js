@@ -5,5 +5,3 @@ function validarFormatoEmail(email) {
     // Utiliza el método test para verificar si el email coincide con la expresión regular
     return regex.test(email);
 }
-
-export { validarFormatoEmail }
