@@ -3,7 +3,7 @@ const router = express.Router();
 const pool = require('../controls/db');
 
 
-router.get('/confirm', async(req, res) => {
+router.get('/', async(req, res) => {
     const token = req.query.token;
     const client = await pool.connect();
 
