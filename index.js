@@ -43,8 +43,7 @@ app.get('/confirmar', require('./routes/confirm'));
 // Ruta para cancelar suscripción
 app.get('/cancelar', require('./routes/cancel'));
 
-// Prueba de conexión a la base de datos
-app.get('/testdb', require('./routes/testdb'));
+
 
 // Inicia el servidor
 app.listen(port, () => {
