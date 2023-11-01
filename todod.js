@@ -1,0 +1,161 @@
+const { Pool } = require('pg');
+const express = require('express');
+const bodyParser = require('body-parser');
+const crypto = require('crypto');
+const nodemailer = require('nodemailer');
+const cors = require('cors');
+require('dotenv').config();
+
+const app = express();
+const port = process.env.PORT || 5000;
+
+const pool = new Pool({
+    user: process.env.DB_USER, // Nombre de usuario de la base de datos
+    host: process.env.DB_HOST, // Nombre de host de la base de datos
+    database: process.env.DB_NAME, // Nombre de la base de datos
+    password: process.env.DB_PASSWORD, // Contraseña de la base de datos
+    port: process.env.DB_PORT, // Puerto de la base de datos
+    ssl: true
+});
+
+
+const transporter = nodemailer.createTransport({
+    service: 'Gmail', // O cualquier otro servicio de correo
+    auth: {
+        user: process.env.EMAIL_USER, // Utiliza la variable de entorno para el correo
+        pass: process.env.EMAIL_PASSWORD // Utiliza la variable de entorno para la contraseña
+    }
+});
+
+app.use(bodyParser.json());
+// Crea un middleware de cors
+
+app.use(cors({
+    origin: 'https://ipwebsolutions.vercel.app/', // Reemplaza con la URL de tu aplicación React
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true, // Habilita las cookies y credenciales
+    ssl: true
+}));
+
+
+app.post('/contacto', async(req, res) => {
+    const { email, nombre, apellido } = req.body;
+    const confirmationToken = require('crypto').randomBytes(32).toString('hex'); // Genera un token de confirmación de forma segura
+
+    const client = await pool.connect();
+
+    try {
+        await client.query('BEGIN');
+
+        // Validación de datos de entrada (asegúrate de hacer una validación más completa)
+        if (!email || !nombre || !apellido) {
+            throw new Error('Datos de entrada incompletos');
+        }
+
+        // Inserta el nuevo suscriptor en la base de datos con el token de confirmación
+        const insertQuery = 'INSERT INTO subscribers (email, nombre, apellido, confirmation_token, Subscribed, Unsubscribed) VALUES($1, $2, $3, $4, $5, $6)';
+        await client.query(insertQuery, [email, nombre, apellido, confirmationToken, 'false', 'false']);
+
+        // Envía el correo de confirmación con el enlace que contiene el token
+        const confirmationLink = `https://ipwebsolutionback.onrender.com/confirmar?token=${confirmationToken}`;
+        const mailOptions = {
+            from: process.env.EMAIL_USER,
+            to: email,
+            subject: 'Confirma tu suscripción',
+            text: `Haz clic en el siguiente enlace para confirmar tu suscripción: ${confirmationLink}`
+        };
+
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                console.error('Error al enviar el correo: ' + error);
+
+                // Manejo de error al enviar correo
+                res.status(500).json({ error: 'Error al enviar el correo de confirmación.' });
+            } else {
+                console.log('Correo de confirmación enviado: ' + info.response);
+
+                // Éxito
+                res.json({ message: 'Correo de confirmación enviado.' });
+            }
+        });
+
+        await client.query('COMMIT');
+    } catch (e) {
+        await client.query('ROLLBACK');
+
+        // Manejo de error general
+        console.error('Error en la solicitud:', e);
+        res.status(500).json({ error: 'Error en la solicitud.' });
+    } finally {
+        client.release();
+    }
+});
+
+app.get('/confirmar', async(req, res) => {
+    const token = req.query.token;
+    const client = await pool.connect();
+
+    try {
+        await client.query('BEGIN');
+
+        // Busca un usuario con el token de confirmación en la base de datos
+        const result = await client.query('SELECT email FROM subscribers WHERE confirmation_token = $1', [token]);
+        if (result.rows.length === 1) {
+            const user = result.rows[0];
+            // Actualiza el estado de suscripción del usuario a "true" y borra el token de confirmación
+            await client.query('UPDATE subscribers SET subscribed = true, confirmation_token = null WHERE email = $1', [user.email]);
+            await client.query('COMMIT');
+            res.send('¡Tu suscripción ha sido confirmada!');
+        } else {
+            await client.query('ROLLBACK');
+            res.status(400).send('Token de confirmación no válido.');
+        }
+    } catch (e) {
+        await client.query('ROLLBACK');
+
+        // Manejo de error general
+        console.error('Error al confirmar suscripción:', e);
+        res.status(500).send('Error al confirmar suscripción.');
+    } finally {
+        client.release();
+    }
+});
+
+app.get('/cancelar', async(req, res) => {
+    const email = req.query.email;
+
+    try {
+        // Actualiza el estado de suscripción del usuario a "false" para cancelar la suscripción
+        const result = await pool.query('UPDATE subscribers SET unsubscribed = true WHERE email = $1', [email]);
+
+        if (result.rowCount === 1) {
+            // La actualización tuvo éxito
+            res.send('Tu suscripción ha sido cancelada.');
+        } else {
+            // No se encontró el usuario con el correo electrónico especificado
+            res.status(404).send('Usuario no encontrado.');
+        }
+    } catch (error) {
+        console.error('Error al cancelar la suscripción:', error);
+
+        // Manejo de error general
+        res.status(500).send('Error al cancelar la suscripción.');
+    }
+});
+
+const testDatabaseConnection = async() => {
+    try {
+        const client = await pool.connect();
+        console.log('Conexión a la base de datos exitosa');
+        client.release();
+    } catch (error) {
+        console.error('Error al conectar a la base de datos:', error);
+    }
+};
+
+// Llama a la función de prueba de conexión antes de iniciar el servidor
+testDatabaseConnection();
+
+app.listen(port, () => {
+    console.log(`Servidor Express escuchando en el puerto ${port}`);
+});
