@@ -1,16 +1,21 @@
 const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
-// const validarFormatoEmail = require('../controls/regex');
-const pool = require('../controls/db');
-
-
+const pool = require('../controls/db'); // Asegúrate de proporcionar la ruta correcta a tu archivo de configuración de la piscina
+const nodemailer = require('nodemailer');
 
 router.post('/', async(req, res) => {
     const { email, nombre, apellido } = req.body;
     const confirmationToken = crypto.randomBytes(32).toString('hex');
 
     const client = await pool.connect();
+    const transporter = nodemailer.createTransport({
+        service: 'Gmail', // Nombre del servicio de correo (puedes usar otros servicios o configurar SMTP directamente)
+        auth: {
+            user: process.env.EMAIL_USER, // Tu dirección de correo electrónico
+            pass: process.env.EMAIL_PASSWORD // Tu contraseña de correo electrónico
+        }
+    });
 
     try {
         await client.query('BEGIN');
@@ -19,7 +24,6 @@ router.post('/', async(req, res) => {
         if (!email || !nombre || !apellido) {
             throw new Error('Datos de entrada incompletos');
         }
-        // if (!validarFormatoEmail(email)) { throw new Error('formato de email no valido') }
 
         // Verifica si el correo electrónico ya está en uso
         const checkEmailQuery = 'SELECT * FROM subscribers WHERE email = $1';
@@ -32,8 +36,9 @@ router.post('/', async(req, res) => {
         }
 
         // Inserta el nuevo suscriptor en la base de datos con el token de confirmación
-        const insertQuery = 'INSERT INTO subscribers (email, nombre, apellido, confirmation_token, Subscribed, Unsubscribed) VALUES($1, $2, $3, $4, $5, $6)';
-        await client.query(insertQuery, [email, nombre, apellido, confirmationToken, 'false', 'false']);
+        const insertQuery = 'INSERT INTO subscribers (email, nombre, apellido, confirmation_token, subscribed, unsubscribed) VALUES($1, $2, $3, $4, $5, $6)';
+        await client.query(insertQuery, [email, nombre, apellido, confirmationToken, false, false]);
+
         // Envía el correo de confirmación con el enlace que contiene el token
         const confirmationLink = `https://ipwebsolutionback.onrender.com/confirmar?token=${confirmationToken}`;
         const mailOptions = {
@@ -58,7 +63,6 @@ router.post('/', async(req, res) => {
         });
 
         await client.query('COMMIT');
-        res.json({ message: 'Correo de confirmación enviado.' });
     } catch (e) {
         await client.query('ROLLBACK');
 
