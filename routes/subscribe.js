@@ -3,7 +3,7 @@ const router = express.Router();
 const crypto = require('crypto');
 const pool = require('../controls/db'); // Asegúrate de proporcionar la ruta correcta a tu archivo de configuración de la piscina
 const nodemailer = require('nodemailer');
-const validarFormatoEmail = require("../controls/regex");
+const control = require("../controls/regex");
 
 router.post('/', async(req, res) => {
     const { email, nombre, apellido } = req.body;
@@ -40,7 +40,7 @@ router.post('/', async(req, res) => {
         }
         console.log('4')
 
-        if (!validarFormatoEmail(email)) {
+        if (!control.validarFormatoEmail(email)) {
             res.status(400).json({
                 error: 'El correo electronico no tiene el formato correcto'
             });
