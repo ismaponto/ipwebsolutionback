@@ -28,7 +28,7 @@ const transporter = nodemailer.createTransport({
 
 app.use(bodyParser.json());
 app.use(cors({
-    origin: 'https://ipwebsolutions-n854q83yz-ismaponto.vercel.app',
+    origin: 'https://ipwebsolutions.vercel.app',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
     ssl: true
