@@ -42,14 +42,18 @@ router.post('/', async(req, res) => {
 
         if (checkEmailResult.rows.length > 0) {
             // El correo electrónico ya está en uso, maneja el error
-            res.status(400).json({ error: 'El correo electrónico ya está registrado.' });
+            res.status(400).json({
+                error: 'El correo electrónico ya está registrado.',
+                message: 'Este correo ya fue registrado'
+            });
             return;
         }
         console.log('4')
 
         if (!validarFormatoEmail(email)) {
             res.status(400).json({
-                error: 'El correo electronico no tiene el formato correcto'
+                error: 400,
+                message: 'El correo electronico no tiene el formato correcto'
             });
             return;
         }
