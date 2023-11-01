@@ -40,19 +40,24 @@ app.use(cors({
 
 app.post('/contacto', async(req, res) => {
     const { email, nombre, apellido } = req.body;
-    const userId = uuid.v4();
-    const confirmationToken = crypto.randomBytes(32).toString('hex'); // Genera un token de confirmación
+    const confirmationToken = require('crypto').randomBytes(32).toString('hex'); // Genera un token de confirmación de forma segura
 
     const client = await pool.connect();
 
     try {
         await client.query('BEGIN');
 
+        // Validación de datos de entrada (asegúrate de hacer una validación más completa)
+        if (!email || !nombre || !apellido) {
+            throw new Error('Datos de entrada incompletos');
+        }
+
         // Inserta el nuevo suscriptor en la base de datos con el token de confirmación
-        await client.query('INSERT INTO subscribers ( email, nombre, apellido, confirmation_token, Subscribed, Unsubscribed) VALUES($1, $2, $3, $4, $5, $6, $7)', [email, nombre, apellido, confirmationToken, 'false', 'false']);
+        const insertQuery = 'INSERT INTO subscribers (email, nombre, apellido, confirmation_token, Subscribed, Unsubscribed) VALUES($1, $2, $3, $4, $5, $6)';
+        await client.query(insertQuery, [email, nombre, apellido, confirmationToken, 'false', 'false']);
 
         // Envía el correo de confirmación con el enlace que contiene el token
-        const confirmationLink = `https://ipwebsolutionback.onrender.com8]\confirmar?token=${confirmationToken}`;
+        const confirmationLink = `https://ipwebsolutionback.onrender.com/confirmar?token=${confirmationToken}`;
         const mailOptions = {
             from: process.env.EMAIL_USER,
             to: email,
@@ -62,10 +67,14 @@ app.post('/contacto', async(req, res) => {
 
         transporter.sendMail(mailOptions, (error, info) => {
             if (error) {
-                console.log('Error al enviar el correo: ' + error);
+                console.error('Error al enviar el correo: ' + error);
+
+                // Manejo de error al enviar correo
                 res.status(500).json({ error: 'Error al enviar el correo de confirmación.' });
             } else {
                 console.log('Correo de confirmación enviado: ' + info.response);
+
+                // Éxito
                 res.json({ message: 'Correo de confirmación enviado.' });
             }
         });
@@ -73,7 +82,10 @@ app.post('/contacto', async(req, res) => {
         await client.query('COMMIT');
     } catch (e) {
         await client.query('ROLLBACK');
-        throw e;
+
+        // Manejo de error general
+        console.error('Error en la solicitud:', e);
+        res.status(500).json({ error: 'Error en la solicitud.' });
     } finally {
         client.release();
     }
@@ -90,7 +102,7 @@ app.get('/confirmar', async(req, res) => {
         const result = await client.query('SELECT email FROM subscribers WHERE confirmation_token = $1', [token]);
         if (result.rows.length === 1) {
             const user = result.rows[0];
-            // Actualiza el estado de suscripción del usuario a "true"
+            // Actualiza el estado de suscripción del usuario a "true" y borra el token de confirmación
             await client.query('UPDATE subscribers SET subscribed = true, confirmation_token = null WHERE email = $1', [user.email]);
             await client.query('COMMIT');
             res.send('¡Tu suscripción ha sido confirmada!');
@@ -100,7 +112,10 @@ app.get('/confirmar', async(req, res) => {
         }
     } catch (e) {
         await client.query('ROLLBACK');
-        throw e;
+
+        // Manejo de error general
+        console.error('Error al confirmar suscripción:', e);
+        res.status(500).send('Error al confirmar suscripción.');
     } finally {
         client.release();
     }
@@ -109,10 +124,23 @@ app.get('/confirmar', async(req, res) => {
 app.get('/cancelar', async(req, res) => {
     const email = req.query.email;
 
-    // Actualiza el estado de suscripción del usuario a "false" para cancelar la suscripción
-    await pool.query('UPDATE subscribers SET unsubscribed = true WHERE email = $1', [email]);
+    try {
+        // Actualiza el estado de suscripción del usuario a "false" para cancelar la suscripción
+        const result = await pool.query('UPDATE subscribers SET unsubscribed = true WHERE email = $1', [email]);
 
-    res.send('Tu suscripción ha sido cancelada.');
+        if (result.rowCount === 1) {
+            // La actualización tuvo éxito
+            res.send('Tu suscripción ha sido cancelada.');
+        } else {
+            // No se encontró el usuario con el correo electrónico especificado
+            res.status(404).send('Usuario no encontrado.');
+        }
+    } catch (error) {
+        console.error('Error al cancelar la suscripción:', error);
+
+        // Manejo de error general
+        res.status(500).send('Error al cancelar la suscripción.');
+    }
 });
 
 const testDatabaseConnection = async() => {
